@@ -24,36 +24,58 @@ tabs.forEach(tab => {
     tabs.forEach(t => t.classList.remove('active'));
     views.forEach(v => v.classList.remove('active'));
     tab.classList.add('active');
-    document.getElementById('view-' + tab.dataset.tab).classList.add('active');
+    const view = document.getElementById('view-' + tab.dataset.tab);
+    if (view) view.classList.add('active');
     if (tab.dataset.tab === 'vault') renderVault();
   });
 });
 
 btnPick.addEventListener('click', async () => {
-  const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-  if (!tab.id) return;
-  statusEl.textContent = 'Picking... Click element on page • Esc to cancel';
   try {
-    await chrome.tabs.sendMessage(tab.id, { type: 'CBV_START_PICKER' });
-  } catch (e) {
+    const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+    if (!tab || !tab.id) { statusEl.textContent = 'No active tab'; return; }
+    if (tab.url && (tab.url.startsWith('chrome://') || tab.url.startsWith('edge://') || tab.url.startsWith('chrome-extension://'))) {
+      statusEl.textContent = 'Cannot run on this page';
+      return;
+    }
+    statusEl.textContent = 'Starting picker...';
     try {
-      await chrome.scripting.executeScript({ target: { tabId: tab.id }, files: ['content/picker.js'] });
-      setTimeout(async () => {
-        try { await chrome.tabs.sendMessage(tab.id, { type: 'CBV_START_PICKER' }); } catch (e2) {}
-      }, 150);
-    } catch (e2) {}
+      await chrome.tabs.sendMessage(tab.id, { type: 'CBV_START_PICKER' });
+      statusEl.textContent = 'Picking... Click element on page • Esc to cancel';
+      return;
+    } catch (err) {
+      // inject all scripts
+      try {
+        await chrome.scripting.executeScript({ target: { tabId: tab.id }, files: ['content/picker.js'] });
+        await chrome.scripting.executeScript({ target: { tabId: tab.id }, files: ['content/extractor-global.js'] });
+        await chrome.scripting.executeScript({ target: { tabId: tab.id }, files: ['content/content.js'] });
+        setTimeout(async () => {
+          try {
+            await chrome.tabs.sendMessage(tab.id, { type: 'CBV_START_PICKER' });
+            statusEl.textContent = 'Picking... Click element on page • Esc to cancel';
+          } catch (e2) {
+            statusEl.textContent = 'Failed to start picker';
+          }
+        }, 250);
+        return;
+      } catch (e3) {
+        statusEl.textContent = 'Failed: ' + e3.message;
+      }
+    }
+  } catch (e) {
+    statusEl.textContent = 'Error: ' + e.message;
   }
 });
 
 chrome.runtime.onMessage.addListener((msg) => {
-  if (msg.type === 'CBV_BUNDLE_READY') {
+  if (msg && msg.type === 'CBV_BUNDLE_READY') {
     currentBundle = msg.bundle;
     statusEl.textContent = 'Bundle ready • Check Preview/Assets/Code';
     renderAll();
-    const previewTab = document.querySelector('.tab[data-tab="preview"]');
-    if (previewTab) previewTab.click();
+    const ptab = document.querySelector('.tab[data-tab="preview"]');
+    if (ptab) ptab.click();
   }
-  if (msg.type === 'CBV_BUNDLE_ERROR') {
+  if (msg && msg.type === 'CBV_BUNDLE_ERROR') {
     statusEl.textContent = 'Error: ' + msg.error;
   }
 });
@@ -67,6 +89,7 @@ function renderAll() {
 }
 
 function renderPreview() {
+  if (!previewFrame) return;
   previewFrame.innerHTML = '';
   const style = document.createElement('style');
   style.textContent = currentBundle.css || '';
@@ -77,6 +100,7 @@ function renderPreview() {
 }
 
 function renderAssets() {
+  if (!assetsList) return;
   assetsList.innerHTML = '';
   const a = currentBundle.assets || {};
 
@@ -188,7 +212,7 @@ function renderAssets() {
 }
 
 function renderCode() {
-  if (!currentBundle) return;
+  if (!currentBundle || !codeHtml || !codeCss || !codeAll) return;
   codeHtml.value = currentBundle.html || '';
   codeCss.value = currentBundle.css || '';
   const linksHints = (currentBundle.assets && currentBundle.assets.links && currentBundle.assets.links.length)
@@ -199,16 +223,16 @@ function renderCode() {
 }
 
 function renderRaw() {
-  if (!currentBundle) return;
+  if (!currentBundle || !rawJson) return;
   rawJson.textContent = JSON.stringify(currentBundle, null, 2);
 }
 
 document.querySelectorAll('[data-copy]').forEach(btn => {
   btn.addEventListener('click', async () => {
     const type = btn.dataset.copy;
-    if (type === 'html') await navigator.clipboard.writeText(codeHtml.value);
-    if (type === 'css') await navigator.clipboard.writeText(codeCss.value);
-    if (type === 'all') await navigator.clipboard.writeText(codeAll.value);
+    if (type === 'html' && codeHtml) await navigator.clipboard.writeText(codeHtml.value);
+    if (type === 'css' && codeCss) await navigator.clipboard.writeText(codeCss.value);
+    if (type === 'all' && codeAll) await navigator.clipboard.writeText(codeAll.value);
     const old = btn.textContent;
     btn.textContent = 'Copied!';
     setTimeout(() => btn.textContent = old, 900);
@@ -221,7 +245,9 @@ if (btnSave) {
     try {
       await db.bundles.put(currentBundle);
       statusEl.textContent = 'Saved to Vault';
-      document.querySelector('.tab[data-tab="vault"]').click();
+      const vtab = document.querySelector('.tab[data-tab="vault"]');
+      if (vtab) vtab.click();
+      renderVault();
     } catch (e) {
       statusEl.textContent = 'Error saving: ' + e.message;
     }
@@ -231,6 +257,7 @@ if (btnSave) {
 if (vaultSearch) vaultSearch.addEventListener('input', renderVault);
 
 async function renderVault() {
+  if (!vaultList) return;
   const q = ((vaultSearch && vaultSearch.value) || '').toLowerCase();
   let items = [];
   try { items = await db.bundles.orderBy('createdAt').reverse().toArray(); } catch (e) { items = []; }
