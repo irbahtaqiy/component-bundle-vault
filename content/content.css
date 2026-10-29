@@ -1,0 +1,29 @@
+.cbv-highlight {
+  outline: 2px solid #4f7cff !important;
+  outline-offset: 2px !important;
+  cursor: crosshair !important;
+  box-shadow: 0 0 0 4px rgba(79, 124, 255, 0.08) !important;
+}
+
+.cbv-highlight-hover {
+  outline: 2px dashed #22d3ee !important;
+  outline-offset: 2px !important;
+}
+
+.cbv-picker-overlay {
+  position: fixed;
+  top: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 2147483647;
+  background: rgba(15, 15, 20, 0.9);
+  color: #fff;
+  font-family: Inter, system-ui, sans-serif;
+  font-size: 12px;
+  padding: 8px 12px;
+  border-radius: 999px;
+  backdrop-filter: blur(6px);
+  box-shadow: 0 10px 40px rgba(0,0,0,0.4);
+  pointer-events: none;
+  white-space: nowrap;
+}
