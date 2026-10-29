@@ -1,6 +1,6 @@
 let _db = null;
 
-export function initVault() {
+function initVault() {
   if (_db) return _db;
   const DexieCtor = (typeof Dexie !== 'undefined') ? Dexie : ((typeof window !== 'undefined' && window.Dexie) ? window.Dexie : null);
   if (!DexieCtor) {
@@ -12,3 +12,5 @@ export function initVault() {
   });
   return _db;
 }
+
+window.initVault = initVault;
