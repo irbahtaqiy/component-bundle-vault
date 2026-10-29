@@ -1,19 +1,17 @@
 chrome.runtime.onInstalled.addListener(() => {
-  chrome.sidePanel.setPanelBehavior({ openPanelOnActionClick: true }).catch(() => {});
+  try {
+    chrome.sidePanel.setPanelBehavior({ openPanelOnActionClick: true });
+  } catch (e) {}
 });
 
-chrome.action.onClicked.addListener(async (tab) => {
-  if (!tab || !tab.id) return;
-  try {
-    await chrome.sidePanel.setOptions({
-      tabId: tab.id,
-      path: "sidepanel/index.html",
-      enabled: true
-    });
-  } catch (e) {}
-  try {
-    await chrome.sidePanel.open({ tabId: tab.id });
-  } catch (e) {
-    // ignore
+chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
+  if (changeInfo.status === 'complete') {
+    try {
+      chrome.sidePanel.setOptions({
+        tabId: tabId,
+        path: 'sidepanel/index.html',
+        enabled: true
+      });
+    } catch (e) {}
   }
 });
