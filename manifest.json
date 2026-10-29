@@ -17,7 +17,7 @@
     "service_worker": "background/service-worker.js"
   },
   "action": {
-    "default_title": "Open Component Bundle Vault"
+    "default_title": "Component Bundle Vault"
   },
   "side_panel": {
     "default_path": "sidepanel/index.html"
@@ -27,13 +27,5 @@
     "32": "icons/icon32.png",
     "48": "icons/icon48.png",
     "128": "icons/icon128.png"
-  },
-  "content_scripts": [
-    {
-      "matches": ["<all_urls>"],
-      "js": ["content/picker.js", "content/extractor-global.js", "content/content.js"],
-      "css": ["content/content.css"],
-      "run_at": "document_idle"
-    }
-  ]
+  }
 }
