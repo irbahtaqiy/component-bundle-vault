@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Component Bundle Vault</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="panel.css">
+</head>
+<body>
+  <header class="header">
+    <div class="header-top">
+      <div class="brand">
+        <div class="dot"></div>
+        <span>Component Bundle Vault</span>
+      </div>
+      <button id="btn-pick" class="btn primary">Pick Element</button>
+    </div>
+    <div class="header-sub">
+      <span id="status">Idle • Click Pick Element to start</span>
+    </div>
+  </header>
+
+  <nav class="tabs">
+    <button class="tab active" data-tab="preview">Preview</button>
+    <button class="tab" data-tab="assets">Assets</button>
+    <button class="tab" data-tab="code">Code</button>
+    <button class="tab" data-tab="raw">Raw Inspect</button>
+    <button class="tab" data-tab="vault">Vault</button>
+  </nav>
+
+  <main class="main">
+    <section class="view active" id="view-preview">
+      <div class="panel">
+        <div class="panel-head">
+          <h3>Live Preview</h3>
+          <p>Hasil bundle langsung di-render disini</p>
+        </div>
+        <div class="preview-frame" id="preview-frame"></div>
+      </div>
+    </section>
+
+    <section class="view" id="view-assets">
+      <div class="panel">
+        <div class="panel-head">
+          <h3>Required Assets</h3>
+          <p>Yang perlu kamu tambahin biar mirip persis</p>
+        </div>
+        <div class="assets-list" id="assets-list"></div>
+      </div>
+    </section>
+
+    <section class="view" id="view-code">
+      <div class="panel">
+        <div class="panel-head">
+          <h3>Bundle Code</h3>
+          <div class="code-actions">
+            <button class="btn ghost" data-copy="html">Copy HTML</button>
+            <button class="btn ghost" data-copy="css">Copy CSS Bundle</button>
+            <button class="btn primary" data-copy="all">Copy All-in-one</button>
+          </div>
+        </div>
+        <div class="code-block">
+          <div class="code-label">HTML</div>
+          <textarea id="code-html" spellcheck="false"></textarea>
+        </div>
+        <div class="code-block">
+          <div class="code-label">CSS Bundle</div>
+          <textarea id="code-css" spellcheck="false"></textarea>
+        </div>
+        <div class="code-block">
+          <div class="code-label">All-in-one (HTML + &lt;style&gt; + Asset hints)</div>
+          <textarea id="code-all" spellcheck="false"></textarea>
+        </div>
+        <button id="btn-save" class="btn primary full">Save to Vault</button>
+      </div>
+    </section>
+
+    <section class="view" id="view-raw">
+      <div class="panel">
+        <div class="panel-head">
+          <h3>Raw Inspect</h3>
+          <p>Debug matched rules, vars, families</p>
+        </div>
+        <pre id="raw-json"></pre>
+      </div>
+    </section>
+
+    <section class="view" id="view-vault">
+      <div class="panel">
+        <div class="panel-head">
+          <h3>Vault</h3>
+          <div class="vault-actions">
+            <input id="vault-search" placeholder="Search by name/tag..." />
+          </div>
+        </div>
+        <div class="vault-list" id="vault-list"></div>
+      </div>
+    </section>
+  </main>
+
+  <script src="https://unpkg.com/dexie@3.2.4/dist/dexie.min.js"></script>
+  <script type="module" src="panel.js"></script>
+</body>
+</html>
