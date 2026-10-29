@@ -37,15 +37,10 @@ btnPick.addEventListener('click', async () => {
     await chrome.tabs.sendMessage(tab.id, { type: 'CBV_START_PICKER' });
   } catch (e) {
     try {
-      await chrome.scripting.executeScript({
-        target: { tabId: tab.id },
-        files: ['content/content.js']
-      });
+      await chrome.scripting.executeScript({ target: { tabId: tab.id }, files: ['content/picker.js'] });
       setTimeout(async () => {
-        try {
-          await chrome.tabs.sendMessage(tab.id, { type: 'CBV_START_PICKER' });
-        } catch (e2) {}
-      }, 200);
+        try { await chrome.tabs.sendMessage(tab.id, { type: 'CBV_START_PICKER' }); } catch (e2) {}
+      }, 150);
     } catch (e2) {}
   }
 });
@@ -55,7 +50,8 @@ chrome.runtime.onMessage.addListener((msg) => {
     currentBundle = msg.bundle;
     statusEl.textContent = 'Bundle ready • Check Preview/Assets/Code';
     renderAll();
-    document.querySelector('.tab[data-tab="preview"]').click();
+    const previewTab = document.querySelector('.tab[data-tab="preview"]');
+    if (previewTab) previewTab.click();
   }
   if (msg.type === 'CBV_BUNDLE_ERROR') {
     statusEl.textContent = 'Error: ' + msg.error;
@@ -93,7 +89,7 @@ function renderAssets() {
     for (const k in a.cssVars) {
       const item = document.createElement('div');
       item.className = 'asset-item';
-      item.innerHTML = `<span>${k}: ${a.cssVars[k]}</span><button class="btn ghost" data-copy-var="${k}: ${a.cssVars[k]}">Copy</button>`;
+      item.innerHTML = `<span>${k}: ${a.cssVars[k]}</span><button class="btn ghost">Copy</button>`;
       item.querySelector('button').addEventListener('click', () => navigator.clipboard.writeText(`${k}: ${a.cssVars[k]}`));
       list1.appendChild(item);
     }
@@ -195,11 +191,9 @@ function renderCode() {
   if (!currentBundle) return;
   codeHtml.value = currentBundle.html || '';
   codeCss.value = currentBundle.css || '';
-
   const linksHints = (currentBundle.assets && currentBundle.assets.links && currentBundle.assets.links.length)
     ? currentBundle.assets.links.map(l=>`<!-- <link rel="stylesheet" href="${l}"> -->`).join('\n')
     : '<!-- No external font/css links detected -->';
-
   const all = `<!-- Component Bundle Vault: ${currentBundle.name} -->\n<!-- ASSETS TO CHECK -->\n${linksHints}\n\n<style>\n${currentBundle.css || ''}\n</style>\n\n${currentBundle.html || ''}`;
   codeAll.value = all;
 }
@@ -221,27 +215,25 @@ document.querySelectorAll('[data-copy]').forEach(btn => {
   });
 });
 
-btnSave.addEventListener('click', async () => {
-  if (!currentBundle) return;
-  try {
-    await db.bundles.put(currentBundle);
-    statusEl.textContent = 'Saved to Vault';
-    document.querySelector('.tab[data-tab="vault"]').click();
-  } catch (e) {
-    statusEl.textContent = 'Error saving: ' + e.message;
-  }
-});
+if (btnSave) {
+  btnSave.addEventListener('click', async () => {
+    if (!currentBundle) return;
+    try {
+      await db.bundles.put(currentBundle);
+      statusEl.textContent = 'Saved to Vault';
+      document.querySelector('.tab[data-tab="vault"]').click();
+    } catch (e) {
+      statusEl.textContent = 'Error saving: ' + e.message;
+    }
+  });
+}
 
 if (vaultSearch) vaultSearch.addEventListener('input', renderVault);
 
 async function renderVault() {
   const q = ((vaultSearch && vaultSearch.value) || '').toLowerCase();
   let items = [];
-  try {
-    items = await db.bundles.orderBy('createdAt').reverse().toArray();
-  } catch (e) {
-    items = [];
-  }
+  try { items = await db.bundles.orderBy('createdAt').reverse().toArray(); } catch (e) { items = []; }
   if (q) {
     items = items.filter(i => (i.name && i.name.toLowerCase().includes(q)) || JSON.stringify(i.meta || {}).toLowerCase().includes(q));
   }
