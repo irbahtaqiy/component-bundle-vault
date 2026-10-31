@@ -1,7 +1,9 @@
-import { initVault } from './vault.js';
-
 let db = null;
-try { db = initVault(); } catch(e) { console.error(e); }
+try {
+  if (typeof window.initVault === 'function') {
+    db = window.initVault();
+  }
+} catch(e) { console.error(e); }
 
 const btnPick = document.getElementById('btn-pick');
 const statusEl = document.getElementById('status');
