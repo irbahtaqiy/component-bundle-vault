@@ -1,50 +1,77 @@
 # Component Bundle Vault
 
-Full-auto UI component extractor buat designer yang bridging ke dev. Bukan sekedar copy HTML+class, tapi bundle lengkap: matched CSS, CSS variables, fonts, icon fonts, SVG, pseudo-elements/states, plus asset hints biar bisa dipake langsung di project lo.
+Extract UI components from any webpage into a clean, reusable bundle — HTML, CSS, CSS variables, fonts, icon fonts, SVGs, and pseudo-states. Runs as an unpacked Chrome Extension (Manifest V3) with a Side Panel.
 
-## Fitur
-- **Element Picker** - Klik elemen langsung dari halaman manapun
-- **Matched CSS Extraction** - Cuma ambil rule yang beneran kepake ke element + child
-- **CSS Variables Resolver** - Bawa `var(--...)` yang dipake + definisinya dari `:root/[data-theme]`
-- **Font & Icon Detector** - Deteksi `font-family`, `@font-face`, Google/Bunny/Typekit link, Material Symbols/Font Awesome/Phosphor/Remix Icon
-- **Inline SVG** - Kebawa otomatis kalo ada SVG
-- **States & Pseudo** - Ambil `:hover`, `:focus-visible`, `:active`, `::before`, `::after` yang relevan
-- **Live Preview** - Langsung keliatan hasil bundle
-- **Assets Tab** - List "Butuh apa aja" biar lo tau harus nambahin apa
-- **All-in-one Copy** - Copy HTML + `<style>` + asset hints dalam 1 klik
-- **Vault (IndexedDB)** - Simpen bundle lengkap, search, load, delete
+![Component Bundle Vault](https://img.shields.io/badge/Chrome%20Extension-MV3-blue?style=for-the-badge)
+![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)
 
-## Cara Install (Load Unpacked)
+## ✨ Features
 
-1. Download/clone folder `component-bundle-vault/`
-2. Buka `chrome://extensions/`
-3. Aktifin `Developer mode` (pojok kanan atas)
-4. Klik `Load unpacked`
-5. Pilih folder `component-bundle-vault/`
-6. Pin extension nya kalo mau
+- **One-click extraction** - Pick any element on the page with a visual overlay
+- **Smart CSS matching** - Captures styles from matching CSS rules (including pseudo-states like `:hover`, `:focus`, `::before`, `::after`)
+- **CSS Variables** - Detects and collects used CSS custom properties
+- **Fonts & Icon Fonts** - Finds `@font-face` rules and linked font/icon font stylesheets
+- **SVGs** - Extracts inline SVGs within the component
+- **Live Preview** - See the extracted component rendered instantly in the side panel
+- **Assets Panel** - View all required assets (fonts, variables, links) at a glance
+- **Clean Code Output** - Get HTML, bundled CSS, or an all-in-one ready-to-paste snippet
+- **Local Vault** - Save, load, copy, or delete bundles locally with Dexie (offline-first)
+- **Safe & CSP-friendly** - All scripts run locally, no external CDN dependencies
 
-## Cara Pake
+## 🚀 Installation
 
-1. Buka halaman yang mau lo extract komponen nya
-2. Klik icon `Component Bundle Vault` -> Side Panel kebuka
-3. Klik `Pick Element` -> Cursor jadi crosshair
-4. Klik elemen yang lo pengenin (button/card/input/dll)
-5. Tunggu sebentar, langsung muncul di tab `Preview`
-6. Cek `Assets` buat liat font/icon/link yang perlu ditambahin ke project lo
-7. Pindah ke `Code` -> `Copy All-in-one` atau simpen ke `Vault`
+1. Clone this repository
+```bash
+git clone https://github.com/irbahtaqiy/component-bundle-vault.git
+cd component-bundle-vault
+```
 
-## Catatan & Keterbatasan
+2. Open Chrome and go to `chrome://extensions/`
+3. Enable **Developer mode** (top-right)
+4. Click **Load unpacked** and select the cloned folder
+5. Click the extension icon to open the Side Panel
 
-- **Cross-origin stylesheets** - Kalo CSS file nya di-block CORS, isi filenya gabisa dibaca. Solusinya udah di-fallback jadi munculin `<link>` nya di tab Assets.
-- **Cross-origin iframe** - Gabisa extract full.
-- **CSS-in-JS murni** - Kadang class random, hasilnya bisa perlu rapihin dikit.
-- **Shadow DOM tertutup** - Tergantung setup
-- **Etika** - Buat belajar, referensi, dan dipake di project lo sendiri
+## 📖 Usage
 
-## Roadmap
-- [ ] Better CSS-in-JS computed style merger
-- [ ] Auto-generate minimal CSS
-- [ ] Export as JSON/ZIP bundle
-- [ ] Edit before save
-- [ ] Light mode buat sidepanel
-- [ ] Support Firefox
+1. Open any webpage (not `chrome://`, `edge://`, or extension pages)
+2. Click the **Component Bundle Vault** icon → Side Panel opens
+3. Click **Pick Element** → crosshair overlay appears
+4. Hover and click the element you want to extract (press `ESC` to cancel)
+5. Switch between tabs:
+   - **Preview** - Live rendered component
+   - **Assets** - CSS variables, fonts, icon fonts, CDN links, inline SVGs
+   - **Code** - Copy HTML, CSS bundle, or All-in-one
+   - **Raw Inspect** - Full JSON bundle for debugging
+   - **Vault** - Save/load your extracted components
+
+## 🛠️ Tech Stack
+
+- **Manifest V3** - Chrome Extension
+- **Side Panel API** - Native side panel UI
+- **chrome.scripting** - Inject picker/extractor in `MAIN` world
+- **postMessage Bridge** - Safe bundle transfer avoiding extension context issues
+- **Dexie.js** - Local IndexedDB storage for the vault
+- **Vanilla JS/CSS** - No frameworks, lightweight and fast
+
+## 🔒 Permissions
+
+- `activeTab` - Access current tab
+- `scripting` - Inject scripts to extract components
+- `sidePanel` - Open side panel UI
+- `storage` - Store data locally
+- `tabs` - Query active tab
+- `<all_urls>` - Run on any webpage
+
+## 📝 Notes
+
+- Works best on regular websites with styles in stylesheets
+- Some dynamically injected styles may not be fully captured
+- All data stays local in your browser
+
+## 🤝 Contributing
+
+Contributions are welcome! Feel free to open issues or submit pull requests.
+
+## 📄 License
+
+MIT License - see [LICENSE](LICENSE) for details.
